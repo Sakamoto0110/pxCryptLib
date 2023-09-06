@@ -363,32 +363,26 @@ constexpr pxDWORD SetLValue(pxDWORD dw, pxDWORD value) {
 //}
 
 #include "pxEncryption.h"
-#include <Windows.h>
-void gotoxy(int x, int y) {
-	COORD c;
-	c.X = x;
-	c.Y = y;
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-}
+//#include <Windows.h>
+//void gotoxy(int x, int y) {
+//	COORD c;
+//	c.X = x;
+//	c.Y = y;
+//	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+//}
 int main()
 {
-	StringBlockHandle block = StringBlockHandle(9, 1, "123456789");
+	StringBlockHandle block(3, 3, "abcd");
+	/*for (pxI32 y = 0; y < block.szHeight; y++) {
+		for (pxI32 x = 0; x < block.szWidth; x++) {
+
+			pxI32 index = x + y * block.szWidth;
+			printf("%c", block.pBuffer[index]);
+		}
+		printf("\n");
+	}*/
 	block.Print2D();
-	for (int i = 0; i < 1000; i++) {
-		gotoxy(0, 0);
-//		block.rows[0]._shift(1);
-		//block.rows[1]._shift(-1);
-		block.rows[0]._shift(1);
-		std::cout << block.rows[0] << "\n\n";
-		Sleep(150);
-	}
-
-
-	
-	
-	
-	//block.Print2D();
-	//std::cout << block << ".\n";
+	std::cout << block << ".\n";
 	/*sb16 block("abcde");
 	std::cout << block << ".\n";
 
