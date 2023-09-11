@@ -341,55 +341,89 @@ const char* decodeString(const char* msg, int key) {
 	return emsg;
 }
 
-constexpr pxDWORD GetRValue(pxDWORD dw) {
-	return  dw ^ ( (0b1111111111111111111111111111111100000000000000000000000000000000));
-}
-constexpr pxDWORD GetLValue(pxDWORD dw) {
-	return dw & (dw >> 32);
-}
-
-constexpr pxDWORD SetRValue(pxDWORD dw, pxWORD value) {
-	return dw | value;
-}
-constexpr pxDWORD SetLValue(pxDWORD dw, pxDWORD value) {
-	return dw | (value << 32);
-}
-
-//pxDWORD SetRValue(pxDWORD& dw, pxWORD value) {
-//	return dw |= value;
-//}
-//pxDWORD SetLValue(pxDWORD& dw, pxWORD value) {
-//	return dw |= (value << 15);
-//}
 
 #include "pxEncryption.h"
-//#include <Windows.h>
-//void gotoxy(int x, int y) {
-//	COORD c;
-//	c.X = x;
-//	c.Y = y;
-//	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-//}
+
+
+struct ExprNode {
+	ExprNode* a = 0;
+	ExprNode* b = 0;
+	char op=0;
+	long long value=0;
+
+	ExprNode(){}
+	ExprNode(long long val):value(val){}
+
+	long long Eval() {
+		if (op == '+') {
+			if (a != 0 && b != 0) {
+				return a->Eval() + b->Eval();
+			}
+
+		}
+		if (a != 0 && b == 0)
+			return a->Eval();
+		return value;
+	}
+};
+
+#include <stack>
 int main()
 {
-	StringBlockHandle block(3, 3, "abcd");
-	/*for (pxI32 y = 0; y < block.szHeight; y++) {
-		for (pxI32 x = 0; x < block.szWidth; x++) {
-
-			pxI32 index = x + y * block.szWidth;
-			printf("%c", block.pBuffer[index]);
+	constexpr int size = 7;
+	char str[8] = "1+3+6+6";
+	std::stack<ExprNode*> stk{};
+	for (int i = 0; i < size-1; i++) {
+		if (str[i] == '+') {
+			ExprNode* op = new ExprNode();
+			if (stk.size() > 0) {
+				ExprNode* last = stk.top();
+				if (last != 0) {
+					
+					op->a = last;
+				}
+			}
+			else {
+				if (str[i - 1] == '1') {
+					op->a = new ExprNode(1);
+				}
+				if (str[i - 1] == '3') {
+					op->a = new ExprNode(3);
+				}
+				if (str[i - 1] == '6') {
+					op->a = new ExprNode(6);
+				}
+			}
+			if (str[i + 1] == '1') {
+				op->b = new ExprNode(1);
+			}
+			if (str[i + 1] == '3') {
+				op->b = new ExprNode(3);
+			}
+			if (str[i+1] == '6') {
+				op->b = new ExprNode(6);
+			}
+			op->op = '+';
+			stk.push(op);
 		}
-		printf("\n");
-	}*/
-	block.Print2D();
-	std::cout << block << ".\n";
-	/*sb16 block("abcde");
-	std::cout << block << ".\n";
+		
+		
+		
+	}
+	for (int i = 0; i < stk.size(); i++) {
+		auto expr = stk.top();
+		std::cout << expr->Eval() << std::endl;
+		stk.pop();
+	}
+	
+	ExprNode a = 10;
+	ExprNode b = 5;
 
-	block.Shift(block.hsb->strBlock, 2, 2, 5, block.hsb->szContent, block.hsb->szBlock, 0);
-	std::cout << block << ".\n";*/
-
-	//std::cout << (char*)((void*)&block) << '\n';
+	ExprNode e;
+	e.a = &a;
+	e.b = &b;
+	e.op = '+';
+	
     return 0;
 }
 
