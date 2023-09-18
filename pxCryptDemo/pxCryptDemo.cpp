@@ -366,10 +366,323 @@ struct ExprNode {
 		return value;
 	}
 };
+template<size_t N>
+struct StringLiteral {
+	constexpr StringLiteral(const char(&str)[N]) {
+		for (int i = 0; i < N; i++)
+			value[i] = str[i];
+	}
+
+	char value[N];
+};
+
+
+
+template<StringLiteral signature>
+class vtObject_t {
+public:
+	static constexpr const char* _signature = signature.value;
+};
+#define VTC_CURPOS "\x1b[%i;%iH"
+struct vtPosition :  vtObject_t<VTC_CURPOS> {
+	int x;
+	int y;
+	vtPosition(int x, int y) : x(x),y(y) {}
+	friend std::ostream& operator <<(std::ostream& out, const vtPosition& p);
+
+};
+
+std::ostream& operator <<(std::ostream& out, const vtPosition& p) {
+	printf(p._signature, p.x, p.y);
+	return out;
+}
 
 #include <stack>
+#include "../pxConsoleHelper.h"
+#include <Windows.h>
+
+template <typename T>
+T lerp(const T& a, const T& b, float t) {
+	return a + t * (b - a);
+}
+#include <array>
+
+
+
+template<size_t sz>
+constexpr std::array<int32_t,sz> MakeColorMap(auto min, auto max) {
+	auto cmap= std::array<int32_t, sz>();
+	for (size_t i = 0; i < sz; i++) {
+		const float t = ((float)(1+i) * ((float)sz / 100));
+		const float t1 = 1 - t;
+		float r = lerp(min, max, t);
+		float b = lerp(min, max, t1);
+		cmap[i] = Color_RGB(r, 0, b);
+
+	}
+	return cmap;
+}
+
+
+
+void gotoxy(short a, short b) //Custom gotoxy() function
+{
+	COORD coordinates; //Data type of co-ordinates
+	coordinates.X = a; //Assign value to X- Co-ordinate
+	coordinates.Y = b; //Assign value to Y Co-ordinate
+
+	SetConsoleCursorPosition(
+		GetStdHandle(STD_OUTPUT_HANDLE), coordinates);
+
+}
+
+//static constexpr char null_char = (char)0xB0;
+#include "StringBlock.h"
+class StringBlockHandleIterator {
+public:
+	StringBlockHandle_t& handle;
+	size_t pos = 0;
+
+	decltype(*handle.data)& Next() {
+		return handle.data[(pos++%handle.size)];
+	}
+
+	decltype(handle.data) begin() {
+		return &handle.data[0];
+	}
+	decltype(handle.data) end() {
+		return &handle.data[handle.size];
+	}
+	StringBlockHandleIterator(StringBlockHandle_t& _handle) :handle(_handle) {
+	}
+};
+
+void ShowConsoleCursor(bool showFlag)
+{
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	CONSOLE_CURSOR_INFO     cursorInfo;
+
+	GetConsoleCursorInfo(out, &cursorInfo);
+	cursorInfo.bVisible = showFlag; // set the cursor visibility
+	SetConsoleCursorInfo(out, &cursorInfo);
+}
+
+// Function to interpolate between two colors
+// r1, g1, b1: Color 1 (e.g., red)
+// r2, g2, b2: Color 2 (e.g., blue)
+// t: Interpolation parameter (0.0 to 1.0)
+// Returns the interpolated color
+int interpolateColor(int r1, int g1, int b1, int r2, int g2, int b2, double t) {
+	int r = static_cast<int>((1.0 - t) * r1 + t * r2);
+	int g = static_cast<int>((1.0 - t) * g1 + t * g2);
+	int b = static_cast<int>((1.0 - t) * b1 + t * b2);
+	return (r << 16) | (g << 8) | b;
+}
+
+#include <vector>
+// Function provided by chat gpt 3.5
+std::vector<int32_t> _ColorMap(auto width, auto height) {
+	auto r = std::vector<int32_t>();
+	// Define the minimum and maximum brightness values
+	const double MIN_BRIGHTNESS = 0.5;
+	const double MAX_BRIGHTNESS = 1.0;
+
+	// Generate the color map
+	for (int y = 0; y < height; ++y) {
+		for (int x = 0; x < width; ++x) {
+			// Calculate the brightness (y-axis)
+			double brightness = MIN_BRIGHTNESS + (MAX_BRIGHTNESS - MIN_BRIGHTNESS) * (static_cast<double>(y) / height);
+			
+			// Interpolate between red (255, 0, 0) and blue (0, 0, 255) for the x-axis
+			int color = interpolateColor(255, 0, 0, 0, 0, 255, static_cast<double>(x) / width);
+
+			// Adjust brightness
+			int adjustedR = static_cast<int>(brightness * (color >> 16 & 255));
+			int adjustedG = static_cast<int>(brightness * (color >> 8 & 255));
+			int adjustedB = static_cast<int>(brightness * (color & 255));
+			r.push_back(Color_RGB(adjustedR, adjustedG, adjustedB));
+		}
+	}
+	
+	return r;
+
+}
+namespace exemples {
+	constexpr const char* STRING_SAMPLE_10x10 = "T316LTQN6RG37UAIFZN31QJT3QIWTAM9CW8D77HODJEHMU7ESF0OMQP042OGHHO3WIH2NY62AUPXJDIVDR0GCLN0LEVLT8GV3TZ";
+	constexpr const char* STRING_SAMPLE_5x5 = "QCBLQR9ZUMONVLMJGC13ARJCX";
+
+
+	void exemple_1_10x10() {
+		StringBlock sb(10, 10, STRING_SAMPLE_10x10);
+		sb.Fill_null_spaces(' ');
+		auto colors = _ColorMap(10, 10);
+		
+		for (int i = 0; i < 100; i++) {
+			sb.GetHandle()[i].color = colors[(99 - i)%100];
+		}
+
+
+		sb.Print();
+		auto s = 10;
+		gotoxy(0, s + 2);
+		sb.Print();
+		gotoxy(0, s * 2 + 2);
+		printf("\x1b[0m");
+		for (int i = 0; i < 1000; i++) {
+			/*for (int j = 0; j < 10; j++) {
+				sb.ShiftRow(j, 1);
+				sb.ShiftCol((j ), 1);
+			}*/
+			
+			
+			auto i1 = (rand()) % s;
+			if (rand() % 2 == 0) {
+				sb.ShiftRow(i1, 1);
+			}
+			else {
+				sb.ShiftCol(i1, 1);
+			}
+
+
+			gotoxy(0, 0);
+			sb.Print();
+			Sleep(100);
+			
+		}
+
+
+
+	}
+}
+
+//void ____DWORDTESTING() {
+//	constexpr auto _byte = 0xFF;
+//	constexpr auto _word = 0xFFFF;
+//	{
+//		constexpr auto b1 = _dwByte<1>();
+//		constexpr auto b2 = _dwByte<2>();
+//		constexpr auto b3 = _dwByte<3>();
+//		constexpr auto b4 = _dwByte<4>();
+//
+//		constexpr auto dword1 = 0;
+//		constexpr auto dword2 = 0;
+//		constexpr auto dword3 = 0;
+//		constexpr auto dword4 = 0;
+//
+//		constexpr auto dword_ = _4byteDWORD(0,0, _byte, _byte);
+//
+//		constexpr auto dword = _4byteDWORD(_byte, _byte, 0, 0);
+//
+//		constexpr auto _dword1 = _dwByte<3>(dword, 0xFF);
+//
+//		constexpr auto _b1 = _dwByte<1>(_dword1);
+//		constexpr auto _b2 = _dwByte<2>(_dword1);
+//		constexpr auto _b3 = _dwByte<3>(_dword1);
+//		constexpr auto _b4 = _dwByte<4>(_dword1);
+//
+//
+//
+//
+//		constexpr auto _dword = _dw4Words(0xFFFF, 0xFFFF);
+//
+//
+//	}
+//	
+//
+//	{
+//		constexpr auto w1 = _dwWord<1>();
+//		constexpr auto w2 = _dwWord<2>();
+//
+//		constexpr auto dword1 = 0;
+//
+//		constexpr auto dword2 = _dwWord<1>(dword1, _word);
+//		constexpr auto dword3 = _dwWord<2>(dword2, _word);
+//
+//		constexpr auto _d = _dwWord<1>(dword3);
+//		constexpr auto _d1 = _dwWord<2>(dword3);
+//
+//		
+//	}
+//
+//}
+#define printl std::cout << '\n'
+constexpr const char* STRING_SAMPLE_5x5 = "QCBLPR9ZUMONVLMJGC13ARJCX";
+constexpr const char* STRING_SAMPLE_3x3 = "123456789";
 int main()
 {
+	ShowConsoleCursor(false);
+	exemples::exemple_1_10x10();
+	StringBlock sb(5, 5, STRING_SAMPLE_5x5);
+	sb.Print();
+	printl;
+	size_t path[9] = { 5,4,4,3,3,2,2,1,1 };
+	
+	StringBlock::Iter it = sb.GetRowIterator(0);
+	
+	std::cout << ">" << it.operator StringBlockHandle_t::_charEx_t & ().ch << " \n";
+	it += {0, 1};
+	std::cout << ">" << it.operator StringBlockHandle_t::_charEx_t &().ch << " \n";
+	it += {0, 1};
+	std::cout << ">" << it.operator StringBlockHandle_t::_charEx_t & ().ch << " \n";
+	it += {0, 1};
+	std::cout << ">" << it.operator StringBlockHandle_t::_charEx_t & ().ch << " \n";
+	it += {0, 1};
+	std::cout << ">" << it.operator StringBlockHandle_t::_charEx_t & ().ch << " \n";
+	it += {0, 1};
+	std::cout << ">" << it.operator StringBlockHandle_t::_charEx_t & ().ch << " \n";
+	printl;
+	/*for (auto v = it.begin(); v != it.end(); v = it.Next()) {
+		printf("v[%c] end[%c]\n", (it.Actual()).ch, (*it.end()).ch);
+	}
+	printf("\n\nv[%c] \n", (it.Actual()).ch);*/
+	
+	printf("\n");
+	printf("\x1b[0m");
+	system("pause");
+	/*PopulateStringBlock(handle, "123456789");
+	std::cout << "size: " << GetSize(handle.cols[0].cols[0]) << '\n';
+	std::cout << "width: " << GetWidth(handle.cols[0].cols[0]) << '\n';
+	std::cout << "height: " << GetHeight(handle.cols[0].cols[0]) << '\n';
+	printf("\n");*/
+	
+//	sb.Print2D();
+
+	
+	//auto b = MakeColorMap<10>(0, 125);
+	//for (size_t y = 0; y < 10; y++) {
+	//	std::array < int32_t, 10> colors = MakeColorMap<10>(125, 255);
+	//	for (size_t x = 0; x < 10; x++) {
+	//		
+	//		//std::cout << colors[y][x] << ',';
+	//		printf("\x1b[48;2;%i;%i;%im ", GetRed(colors[x]- b[y]), 0, GetBlue(colors[x]-b[y]));
+	//	}
+	//	printf("\n");
+	//}
+	//
+	//
+	//
+	//StringBlockHandler sb(3, 3);
+	//
+	//
+
+	//sb.SetContent("123456789");
+	//sb.hRows[0].pcBlock[0].color = Color_RGB(125,0,0);
+	//sb.hRows[1].pcBlock[0].color = Color_RGB(125, 0, 0);
+	//sb.hRows[2].pcBlock[0].color = Color_RGB(125, 0, 0);
+
+	//sb.hRows[0].pcBlock[1].color = Color_RGB(0, 0, 125);
+	//sb.hRows[1].pcBlock[1].color = Color_RGB(0, 0, 125);
+	//sb.hRows[2].pcBlock[1].color = Color_RGB(0, 0, 125);
+
+	//sb.hRows[0].pcBlock[2].color = Color_RGB(0, 125, 0);
+	//sb.hRows[1].pcBlock[2].color = Color_RGB(0, 125, 0);
+	//sb.hRows[2].pcBlock[2].color = Color_RGB(0, 125, 0);
+	////Sleep(3000);
+	//sb.Print2D();
+	//
+	//printf("\x1b[0m");
+	return 0;
 	constexpr int size = 7;
 	char str[8] = "1+3+6+6";
 	std::stack<ExprNode*> stk{};
@@ -415,15 +728,16 @@ int main()
 		std::cout << expr->Eval() << std::endl;
 		stk.pop();
 	}
-	
+	/*
 	ExprNode a = 10;
 	ExprNode b = 5;
 
 	ExprNode e;
 	e.a = &a;
 	e.b = &b;
-	e.op = '+';
+	e.op = '+';*/
 	
     return 0;
 }
+
 

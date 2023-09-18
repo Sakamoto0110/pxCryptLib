@@ -147,7 +147,9 @@
     <ClInclude Include="include\pxEncryption.h" />
     <ClInclude Include="include\pxStrings.h" />
     <ClInclude Include="include\simpleArray.h" />
+    <ClInclude Include="include\StringBlock.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="pxConsoleHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -157,6 +159,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="pxConsoleHelper.cpp" />
     <ClCompile Include="src\pUtils.cpp" />
     <ClCompile Include="src\pxStrings.cpp" />
   </ItemGroup>
