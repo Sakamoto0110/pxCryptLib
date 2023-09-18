@@ -530,12 +530,7 @@ namespace exemples {
 		gotoxy(0, s * 2 + 2);
 		printf("\x1b[0m");
 		for (int i = 0; i < 1000; i++) {
-			/*for (int j = 0; j < 10; j++) {
-				sb.ShiftRow(j, 1);
-				sb.ShiftCol((j ), 1);
-			}*/
-			
-			
+		
 			auto i1 = (rand()) % s;
 			if (rand() % 2 == 0) {
 				sb.ShiftRow(i1, 1);
