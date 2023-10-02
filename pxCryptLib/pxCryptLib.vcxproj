@@ -113,6 +113,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,12 +143,15 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="include\pUtils.h" />
+    <ClInclude Include="include\pxCallable.h" />
     <ClInclude Include="include\pxCrypt.h" />
     <ClInclude Include="include\pxCrypt_core.h" />
     <ClInclude Include="include\pxEncryption.h" />
     <ClInclude Include="include\pxStrings.h" />
+    <ClInclude Include="include\pxvt.h" />
     <ClInclude Include="include\simpleArray.h" />
     <ClInclude Include="include\StringBlock.h" />
+    <ClInclude Include="include\visualizer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="pxConsoleHelper.h" />
   </ItemGroup>
@@ -162,6 +166,7 @@
     <ClCompile Include="pxConsoleHelper.cpp" />
     <ClCompile Include="src\pUtils.cpp" />
     <ClCompile Include="src\pxStrings.cpp" />
+    <ClCompile Include="src\StringBlock.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

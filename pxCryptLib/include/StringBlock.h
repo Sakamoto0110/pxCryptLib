@@ -1,170 +1,20 @@
 #pragma once
+#define pxCryptAPI_EXPORTS
+#include "pxCrypt_core.h"
 #include <stdlib.h>
 #include <cstdint>
-
-constexpr uint16_t _hword(int32_t _dword) { return (_dword & 0xFFFF0000) >> 16; }
-constexpr uint16_t _lword(int32_t _dword) { return (_dword & 0x0000FFFF) >> 0; }
-constexpr uint8_t _hhByte(int32_t _dword) { return (_dword & 0xFF000000) >> 24; }
-constexpr uint8_t _hlByte(int32_t _dword) { return (_dword & 0x00FF0000) >> 16; }
-constexpr uint8_t _lhByte(int32_t _dword) { return (_dword & 0x0000FF00) >> 8; }
-constexpr uint8_t _llByte(int32_t _dword) { return (_dword & 0x000000FF) >> 0; }
-
-// range: 0 - 65565
-constexpr uint32_t _2wordDWORD(uint16_t hWord, uint16_t lWord) {
-	return	((hWord & 0x0FFFF) << 16) |
-		((lWord & 0x0FFFF) << 0);
-}
-
-constexpr uint32_t _4byteDWORD(uint8_t hhByte, uint8_t hlByte, uint8_t lhByte, uint8_t llByte) {
-	return	((hhByte & 0x0FF) << 24) |
-		((hlByte & 0x0FF) << 16) |
-		((lhByte & 0x0FF) << 8) |
-		((llByte & 0x0FF) << 0);
-}
+#include "pxvt.h"
+#include <vector>
 
 
+constexpr uint32_t sbSINGULAR = 0b0001;
+constexpr uint32_t sbSUB = 0b0010;
+constexpr uint32_t sbROOT = 0b0100;
+constexpr uint32_t sbDISPOSABLE = 0b1000;
 
+constexpr uint32_t sbROW = 0b0001 << 4;
+constexpr uint32_t sbCOLUMN = 0b0010 << 4;
 
-
-
-// return a dword containing 2 words ( Little endian convention )
-constexpr uint32_t _dw4Words(uint16_t word1 = 0, uint16_t word2 = 0) {
-	return	((word2 & 0x0FFFF) << 16) |
-			((word1 & 0x0FFFF) <<  0) ;
-}
-
-// return a dword containing 4 bytes ( Little endian convention )
-constexpr uint32_t _dw4Bytes(uint8_t byte1 = 0, uint8_t byte2 = 0, uint8_t byte3 = 0, uint8_t byte4 = 0) {
-	return	((byte4 & 0x0FF) << 24) |
-			((byte3 & 0x0FF) << 16) |
-			((byte2 & 0x0FF) << 8)  |
-			((byte1 & 0x0FF) << 0)  ;
-}
-
-
-
-// C Ready code
-#if 0
-// return max value of a word
-uint16_t _dwWord(size_t little_endian_byte) {
-	return (0xFFFF << ((little_endian_byte - 1) * 16));
-}
-
-// sets the value of the word in the dword ( and returns the dword )
-uint32_t _dwWord(size_t little_endian_byte, uint32_t dword, uint16_t word) {
-	return ((word & 0xFFFF) << ((little_endian_byte - 1) * 16)) | dword;
-}
-
-// returns the desired word contained in the dword
-uint16_t _dwWord(size_t little_endian_byte, uint32_t dword) {
-	return (dword & _dwWord(little_endian_byte)) >> ((little_endian_byte - 1) * 16);
-}
-
-// return max value of a byte
-uint32_t _dwByte(size_t little_endian_byte) {
-	return (0xFF << ((little_endian_byte - 1) * 8));
-}
-
-// sets the value of the byte in the dword ( and returns the dword )
-uint32_t _dwByte(size_t little_endian_byte, uint32_t dword, uint8_t byte) {
-	return ((byte & 0xFF) << ((little_endian_byte - 1) * 8)) | dword;
-}
-
-// returns the desired byte contained in the dword
-uint8_t _dwByte(size_t little_endian_byte, uint32_t dword) {
-	return (dword & _dwByte(little_endian_byte)) >> ((little_endian_byte - 1) * 8);
-}
-	
-
-#endif
-
-
-
-
-
-
-
-
-
-
-
-// return max value of a word
-template<size_t little_endian_byte>
-constexpr uint32_t _dwWord() {
-	static_assert(little_endian_byte >= 0 && little_endian_byte <= 2,
-		"byte must be between 0 and 2, following little endian convention.");
-	return (0xFFFF << ((little_endian_byte - 1) * 16));
-}
-
-// sets the value of the word in the dword ( and returns the dword )
-template<size_t little_endian_byte>
-uint32_t _dwWord(uint32_t& dword, uint16_t word) {
-	static_assert(little_endian_byte >= 0 && little_endian_byte <= 2,
-		"byte must be between 0 and 2, following little endian convention.");
-	return dword = (((word & 0xFFFF) << ((little_endian_byte - 1) * 16)) | dword);
-}
-
-// returns the desired word contained in the dword
-template<size_t little_endian_byte>
-constexpr uint16_t _dwWord(uint32_t dword) {
-	static_assert(little_endian_byte >= 0 && little_endian_byte <= 2,
-		"byte must be between 0 and 2, following little endian convention.");
-	return (dword & _dwWord<little_endian_byte>()) >> ((little_endian_byte - 1) * 16);
-}
-
-
-
-
-// return max value of a byte
-template<size_t little_endian_byte>
-constexpr uint32_t _dwByte() {
-	static_assert(little_endian_byte >= 0 && little_endian_byte <= 4,
-		"byte must be between 0 and 4, following little endian convention.");
-	return (0xFF << ((little_endian_byte - 1) * 8));
-}
-
-// sets the value of the byte in the dword ( and returns the dword )
-template<size_t little_endian_byte>
-uint32_t _dwByte(uint32_t& dword, uint8_t byte) {
-	static_assert(little_endian_byte >= 0 && little_endian_byte <= 4,
-		"byte must be between 0 and 4, following little endian convention.");
-	return dword = (((byte & 0xFF) << ((little_endian_byte - 1) * 8)) | dword);
-}
-
-// returns the desired byte contained in the dword
-template<size_t little_endian_byte>
-constexpr uint8_t _dwByte(uint32_t dword) {
-	static_assert(little_endian_byte >= 0 && little_endian_byte <= 4,
-		"byte must be between 0 and 4, following little endian convention.");
-	return (dword & _dwByte<little_endian_byte>()) >> ((little_endian_byte - 1) * 8);
-	
-}
-
-
-
-
-
-//
-//constexpr uint32_t _SetB1(uint8_t byte, uint32_t dst) {
-//	return (byte) & 0xFF << 24 | dst;
-//}
-//constexpr uint32_t _SetB2(uint8_t byte, uint32_t dst) {
-//	return (byte) & 0xFF << 24 | dst;
-//	uint8_t b1 = _hhByte(dst);
-//	uint8_t b2 = _hhByte(dst);
-//	uint8_t b3 = _hhByte(dst);
-//}
-//constexpr uint32_t _SetB3(uint8_t byte, uint32_t dst) {
-//	return (byte) & 0xFF << 24 | dst;
-//	uint8_t b1 = _hhByte(dst);
-//	uint8_t b2 = _hhByte(dst);
-//	uint8_t b3 = _hhByte(dst);
-//}
-//constexpr uint32_t _SetB4(uint8_t byte, uint32_t dst) {
-//	uint8_t b1 = _hhByte(dst);
-//	uint8_t b2 = _hhByte(dst);
-//	uint8_t b3 = _hhByte(dst);
-//}
 
 struct StringBlockHandle_t {
 	int16_t offset;
@@ -172,280 +22,181 @@ struct StringBlockHandle_t {
 	uint32_t ex;
 	struct StringBlockHandle_t* rows;
 	struct StringBlockHandle_t* cols;
-	typedef struct _charEx_t{
-		char ch;
-		int32_t color;
-		operator char() { return ch; }
-		
-	};
-	_charEx_t* data;
+
+	struct SBHDATA{
+		union {
+			union {
+				uint32_t value;
+				struct {
+					uint8_t a;
+					uint8_t b;
+					uint8_t g;
+					uint8_t r;
+				};
+			}color;
+			uint8_t ch;
+		};
+	}*data;
+
+	/*struct SBHDATA {
+		union {
+			struct {
+				uint8_t ch;
+				uint8_t b;
+				uint8_t g;
+				uint8_t r;
+				
+			};
+			uint32_t value;
+			
+		};
+	}*data;*/
+
 	decltype(*data) operator[](size_t index) {
 
-		return data[index*offset];
+		return data[index * offset];
 	}
 	explicit operator char() { return (*data).ch; }
 };
 
 
 
-void _swap(void* a, void* b) {
-	unsigned char* buff[sizeof(StringBlockHandle_t::_charEx_t)];
-	memcpy(buff, a, sizeof(StringBlockHandle_t::_charEx_t));
-	memcpy(a, b, sizeof(StringBlockHandle_t::_charEx_t));
-	memcpy(b, buff, sizeof(StringBlockHandle_t::_charEx_t));
-}
+
+//
+//void _shift(StringBlockHandle_t* _handle, int32_t value) {
+//	auto _a = [&_handle](size_t _t) {return &_handle->data[_t * _handle->offset]; };
+//	auto _b = [&_handle,&value](size_t _t) {return &_handle->data[((_t + value) % _handle->size) * _handle->offset]; };
+//	
+//	/*auto _swap = [](decltype(_handle->data) __a, decltype(_handle->data) __b) {
+//		unsigned char* buff[sizeof(decltype(_handle->data))];
+//		memcpy(buff, __a, sizeof(decltype(_handle->data)));
+//		memcpy(__a, __b, sizeof(decltype(_handle->data)));
+//		memcpy(__b, buff, sizeof(decltype(_handle->data)));
+//	};*/
+//	auto _swap = [](StringBlockHandle_t::SBHDATA* __a, StringBlockHandle_t::SBHDATA* __b) {
+//		StringBlockHandle_t::SBHDATA tmp = *__a;
+//		*__a = *__b;
+//		*__b = tmp;
+//	};
+//	if (value > 0)
+//		for (int i = _handle->size - 1; i > 0; i--) {
+//			auto a = i * _handle->offset;
+//			auto b = ((i + value) % _handle->size) * _handle->offset;
+//		//	printf("[(%i:%c): (%i:%c)] ", a, _handle->data[a].ch, b, _handle->data[b].ch);
+//			_swap(&_handle->data[a], &_handle->data[b]);
+//		}
+//			
+//	else
+//		for (int i = 0; i < _handle->size-1; i++) {
+//			auto a = i * _handle->offset;
+//			auto b = ((i - value) % _handle->size) * _handle->offset;
+//			//printf("[(%i:%c): (%i:%c)] ", a, _handle->data[a].ch, b, _handle->data[b].ch);
+//			_swap(&_handle->data[a], &_handle->data[b]);
+//		}
+//	//printf("\n");
+//}
+
+// column 0b0001
+// row    0b0010
+// root   0b0011
+// 
+// 
+// 
+
+pxCrypt_API StringBlockHandle_t CreateStringBlockHandle(uint16_t offset, uint16_t size, void* data);
+pxCrypt_API StringBlockHandle_t CreateStringBlockHandle(uint16_t width, uint16_t height);
+
+pxCrypt_API void Dispose(StringBlockHandle_t& handle);
+pxCrypt_API void _shift(StringBlockHandle_t* _handle, int32_t value);
+
+pxCrypt_API bool IsColumn(const StringBlockHandle_t& _handle);
+pxCrypt_API bool IsRow(const StringBlockHandle_t& _handle);
+pxCrypt_API bool IsOwner(const StringBlockHandle_t& _handle);
+pxCrypt_API bool IsSingular(const StringBlockHandle_t& _handle);
+pxCrypt_API bool IsDisposable(const StringBlockHandle_t& _handle);
+
+pxCrypt_API int16_t GetWidth(const StringBlockHandle_t& handle);
+pxCrypt_API int16_t GetHeight(const StringBlockHandle_t& handle);
+pxCrypt_API int16_t GetSize(const StringBlockHandle_t& handle);
+
+pxCrypt_API void ShowInfo(const StringBlockHandle_t& handle);
 
 
-void _shift(StringBlockHandle_t* _handle, int32_t value) {
-	auto _a = [&_handle](size_t _t) {return &_handle->data[_t * _handle->offset]; };
-	auto _b = [&_handle,&value](size_t _t) {return &_handle->data[((_t + value) % _handle->size) * _handle->offset]; };
-	if (value > 0)
-		for (size_t i = _handle->size - 1; i > 0; i--) 
-			_swap(_a(i), _b(i));
-	else
-		for (size_t i = 0; i < _handle->size; i++) 
-			_swap(_a(i), _b(i));
-}
-bool IsColumn(const StringBlockHandle_t& _handle) { return _dwByte<1>(_handle.ex) == 0xF0; }
-bool IsRow(const StringBlockHandle_t& _handle) { return _dwByte<1>(_handle.ex) == 0x0F; }
-bool IsOwner(const StringBlockHandle_t& _handle) { return _dwWord<1>(_handle.ex) == 0xFFFF; }
 
-int16_t GetWidth(const StringBlockHandle_t& handle) {
-	if (IsOwner(handle)) {
-		return handle.size / handle.cols[0].size;
+
+
+
+//
+//// Creates another handle and copies the data from src, this handler also must to be disposed
+//[[nodiscard]] StringBlockHandle_t _copyStringBlock(const StringBlockHandle_t& src) {
+//	StringBlockHandle_t dst = CreateStringBlockHandle(GetWidth(src), GetHeight(src));
+//	for(size_t i = 0; i < dst.size; i++)
+//		memcpy(dst.data, src.data, sizeof(decltype(src.data)));
+//	return dst;
+//}
+
+
+class Iterator2D {
+public :
+	struct IterPoint {
+		int32_t x;
+		int32_t y;
+		bool operator ==(const IterPoint& a) const {
+			return a.x == x && a.y == y;
+		}
+	};
+	IterPoint TOP{ 0, -1 };
+	IterPoint BOTTOM{ 0, 1 };
+	IterPoint LEFT{ -1, 0 };
+	IterPoint RIGHT{ 1, 0 };
+	IterPoint TOPLEFT{ -1, -1 };
+	IterPoint TOPRIGHT{ 1, -1 };
+	IterPoint BOTTOMLEFT{ -1, 1 };
+	IterPoint BOTTOMRIGHT 			{  1, 1 };
+
+	bool CanMove(IterPoint p) {
+		if (p == TOP)     return ptr.y + p.y > 0;
+		if (p == BOTTOM)  return ptr.y + p.y < _handle->cols[0].size;
+		if (p == LEFT)    return ptr.x + p.x > 0;
+		if (p == RIGHT)   return ptr.x + p.x < _handle->rows[0].size;
+
+		/*if (p == _dirs[TOPLEFT]);
+		if (p == _dirs[TOPRIGHT]);
+		if (p == _dirs[BOTTOMLEFT]);
+		if (p == _dirs[BOTTOMLEFT]);*/
 	}
-	return handle.cols == 0 ? 0 : handle.cols[0].size; 
-}
-int16_t GetHeight(const StringBlockHandle_t& handle) { 
-	if (IsOwner(handle)) {
-		return handle.size / handle.rows[0].size;
-	}
-	return handle.rows == 0 ? 0 : handle.rows[0].size; 
-}
-int16_t GetSize(const StringBlockHandle_t& handle) { return handle.size; }
-
-void Dispose(StringBlockHandle_t& handle) {
-	int16_t w = GetWidth(handle);
-	int16_t h = GetHeight(handle);
-	for (int16_t i = 0; i < w; i++) {
-		Dispose(handle.cols[i]);
-	}
-	for (int16_t i = 0; i < h; i++) {
-		Dispose(handle.rows[i]);
-	}
-	delete handle.cols;
-	delete handle.rows;
-	if (_hword(handle.ex) != 0xffff) {
-		delete handle.data;
-	}
-
-}
-
-
-StringBlockHandle_t CreateStringBlockHandle(uint16_t offset, uint16_t size, void* data) {
-	StringBlockHandle_t sb;
-	sb.offset = offset;
-	sb.size = size;
-	sb.data = (decltype(sb.data))data;
-	sb.rows = 0;
-	sb.cols = 0;
-	sb.ex = 0;
-	sb.ex = _dwWord<2>(sb.ex, 0xffff);
-	if (size > 1) {
-		sb.cols = new StringBlockHandle_t[sb.size];
-		sb.rows = new StringBlockHandle_t[sb.size];
-		for (uint16_t i = 0; i < sb.size; i++) {
-			sb.cols[i] = CreateStringBlockHandle(1, 1, &((decltype(sb.data))data)[i]);
-			sb.rows[i] = CreateStringBlockHandle(1, 1, &((decltype(sb.data))data)[i]);
+	void move(IterPoint dst) {
+		size_t szRows = _handle->rows[0].size;
+		size_t szCols = _handle->cols[0].size;
+		int16_t offset = _handle->cols[0].offset;
+		if (CanMove(dst)) {
+			ptr.x += dst.x;
+			ptr.y += dst.y;
+		}
+		else {
+			int i = 0;
 		}
 	}
 
-	return sb;
-}
-
-
-StringBlockHandle_t CreateStringBlockHandle(uint16_t width, uint16_t height) {
-	StringBlockHandle_t sb;
-	sb.offset = 1;
-	sb.size = width * height;
-	sb.data = (decltype(sb.data))calloc(sb.size, sizeof(decltype(sb.data)));
-	for (uint16_t i = 0; i < sb.size; i++) 
-		sb.data[i].ch = 0;
-	sb.cols = new StringBlockHandle_t[width];
-	for (uint16_t i = 0; i < width; i++) {
-		sb.cols[i] = CreateStringBlockHandle(width, height, &sb.data[i]);
-		sb.cols[i].ex = _dwByte<1>(sb.cols[i].ex, 0xF0); // 0x00000001 0b0001
+	Iterator2D& operator +=(IterPoint dst) {
+		move(dst);
+		return *this;
+	}
+	IterPoint ptr;
+	StringBlockHandle_t* _handle;
+	operator decltype(*_handle->data)(){
+		return _handle->rows[ptr.y % _handle->cols[0].size][ptr.x % _handle->rows[0].size];
 	}
 
-	sb.rows = new StringBlockHandle_t[height];
-	for (uint16_t i = 0; i < height; i++) {
-		sb.rows[i] = CreateStringBlockHandle(1, width, &sb.data[i * width]);
-		sb.rows[i].ex = _dwByte<1>(sb.rows[i].ex, 0x0F); // 0x00000002 0b0010
-	}
-	sb.ex = _dwWord<1>(sb.ex, 0xFFFF); // 0x00000003 0b0011
-	return sb;
-}
-
-// Creates another handle and copies the data from src, this handler also must to be disposed
-[[nodiscard]] StringBlockHandle_t _copyStringBlock(const StringBlockHandle_t& src) {
-	StringBlockHandle_t dst = CreateStringBlockHandle(GetWidth(src), GetHeight(src));
-	for(size_t i = 0; i < dst.size; i++)
-		memcpy(dst.data, src.data, sizeof(StringBlockHandle_t::_charEx_t));
-	return dst;
-}
-
-void PopulateStringBlock(StringBlockHandle_t& sb, const char* str) {
-	for (int i = 0; i < strlen(str); i++) {
-		sb.data[i].ch = str[i];
-	}
-}
-
-size_t _indexToCoord(size_t i, const StringBlockHandle_t& _handle) {
-	//size_t result = i / _handle.
-	return 0;
-}
-
-void printBlock(StringBlockHandle_t& handle) {
-	int sz = handle.size;
-	auto w = GetWidth(handle);
-	auto h = GetHeight(handle);
-	for (int y = 0; y < h; y++) {
-		for (int x = 0; x < w; x++) {
-			printf("%c", handle.rows[y][x]);
-		}
-		printf("\n");
-	}
-	for (int i = 0; i < sz; i++) {
-		//printf("%c", handle.data[i*handle.offset].ch);
-	}
-}
-
-
-//class SimpleIterator  {
-//public:
-//	SimpleIterator(StringBlockHandle_t* ptr) :  _activeHandle(ptr) {
-//	}
-//
-//	//void SwitchToRow(size_t idxRow) { _activeHandle = &_owner.rows[idxRow]; }
-//	//void SwitchToCol(size_t idxCol) { _activeHandle = &_owner.cols[idxCol]; }
-//
-//
-//	//void RestorePosition() { pos = 0; }
-//	//void Restore() { _activeHandle = &_owner; pos = 0; }
-//
-//	
-//	StringBlockHandle_t::_charEx_t* begin() {
-//		return &_activeHandle->data[0];
-//	}
-//	StringBlockHandle_t::_charEx_t* end() {
-//		return &_activeHandle->data[(_activeHandle->offset * _activeHandle->size)];
-//	}
-//	StringBlockHandle_t::_charEx_t* Actual() {
-//		return *this;
-//	}
-//	operator StringBlockHandle_t::_charEx_t* () {
-//		return &_activeHandle->data[(_activeHandle->offset * (pos)) % _activeHandle->size];
-//		
-//	}
-//
-//	StringBlockHandle_t::_charEx_t* Next() {
-//		pos++;
-//		return *this;
-//		auto* a = Actual();
-//		++pos;
-//		return a;
-//	}
-//	SimpleIterator& operator ++() {
-//		Next();
-//		return *this;
-//	}
-//protected:
-//	size_t pos = 0;
-//	StringBlockHandle_t* _activeHandle;
-//private:
-//	
-//
-//};
-
-#define _ auto 
-
+private:
+	
+};
+#include "visualizer.h"
 using sbh = StringBlockHandle_t;
 class StringBlock {
 public:
-	class sbhAcessor {
-	public:
-		explicit sbhAcessor(sbh& _handle):_sbh(_handle){}
-
-		auto operator[](size_t index) -> auto {
-			return _sbh.data[index * _sbh.offset];
-		}
-		
-	private:
-		const sbh& _sbh;
-	};
 	
-	class Iterator {
-		friend class StringBlock;		
-		using szpt = int32_t;
-		StringBlockHandle_t* _handle;
-		struct {
-			szpt x = 0;
-			szpt y = 0;
-			bool operator ==(auto a ) {
-				return a.x == x && a.y == y;
-			}
-		}ptr;
-
-	public:
-		
-		decltype(ptr) TOP {  0, -1 };
-		decltype(ptr) BOTTOM 			{  0, 1 };
-		decltype(ptr) LEFT 			{ -1, 0 };
-		decltype(ptr) RIGHT 			{  1, 0 };
-		decltype(ptr) TOPLEFT 			{ -1, -1 };
-		decltype(ptr) TOPRIGHT 			{  1, -1 };
-		decltype(ptr) BOTTOMLEFT 			{ -1, 1 };
-		decltype(ptr) BOTTOMRIGHT 			{  1, 1 };
-
-
-		bool CanMove(decltype(ptr) p) {
-			if (p == TOP)     return ptr.y+p.y > 0;
-			if (p == BOTTOM)  return ptr.y+p.y < _handle->cols[0].size;
-			if (p == LEFT)    return ptr.x+p.x > 0;
-			if (p == RIGHT)   return ptr.x+p.x < _handle->rows[0].size;
-
-			/*if (p == _dirs[TOPLEFT]);
-			if (p == _dirs[TOPRIGHT]);
-			if (p == _dirs[BOTTOMLEFT]);
-			if (p == _dirs[BOTTOMLEFT]);*/
-		}
-	
-
-		void move(decltype(ptr) dst) {
-			size_t szRows = _handle->rows[0].size;
-			size_t szCols = _handle->cols[0].size;
-			int16_t offset = _handle->cols[0].offset;
-			if (CanMove(dst)) {
-				ptr.x += dst.x;
-				ptr.y += dst.y;
-			}
-			else {
-				int i = 0;
-			}
-		}
-
-		Iterator& operator +=(decltype(ptr) dst) {
-			move(dst);
-			return *this;
-		}
-
-		operator decltype(*_handle->data)(){
-			return _handle->rows[ptr.y%_handle->cols[0].size][ptr.x % _handle->rows[0].size];
-		}
-		
-		
-	};
-	using Iter = Iterator;
+	using Iter = Iterator2D;
 
 	Iter GetRowIterator(size_t idxRow) {
 		Iter it;
@@ -453,14 +204,29 @@ public:
 		return it;
 	}
 
-	explicit StringBlock(const char* str) : _handle(CreateStringBlockHandle(strlen(str), 1)) {
-		PopulateStringBlock(_handle, str);
+
+	explicit StringBlock(size_t sz) : _handle(CreateStringBlockHandle(sz, 1)) {
+		
 	}
-	explicit StringBlock(size_t sz, const char* str) : _handle(CreateStringBlockHandle(sz, 1)) {
-		PopulateStringBlock(_handle, str);
+	explicit StringBlock(size_t width, size_t height) : _handle(CreateStringBlockHandle(width, height)) {
+		
 	}
-	explicit StringBlock(size_t width, size_t height, const char* str) : _handle(CreateStringBlockHandle(width, height)) {
-		PopulateStringBlock(_handle, str);
+
+	
+
+
+	void SetColorMap(uint32_t* color_map) {
+		for (int i = 0; i < _handle.size; i++) {
+			uint8_t ch = _handle.data[i].ch;
+			_handle.data[i].color = { color_map[i] };
+			_handle.data[i].ch = ch;
+		}
+	}
+
+	void SetContent(const char* str) {
+		for (int i = 0; i < strlen(str); i++) {
+			_handle.data[i].ch = str[i];
+		}
 	}
 
 	void ShiftRow(size_t idxRow, int32_t non_zero_value) {
@@ -473,7 +239,22 @@ public:
 	void ShiftCol(size_t idxCol, int32_t non_zero_value) {
 		auto value = non_zero_value;
 		if (value == 0) return;
-		_shift(&_handle.cols[idxCol], value);
+
+		if (value < 0) {
+			while (value++ < 0) {
+				_shift(&_handle.cols[idxCol], -1);
+			}
+		}
+		else if (value > 0) {
+			while (value-- > 0) {
+				_shift(&_handle.cols[idxCol], 1);
+			}
+		}
+
+		/*ifnon_zero_value = non_zero_value * -1 + this->Height()-1;
+		} (non_zero_value < 0) {
+			*/
+		
 
 	}
 
@@ -484,20 +265,7 @@ public:
 	StringBlockHandle_t& GetHandle() {
 		return _handle;
 	}
-	StringBlockHandle_t& GetRowHandle(size_t idxRow) {
-		return _handle.rows[idxRow];
-	}
-	StringBlockHandle_t& GetColHandle(size_t idxCol) {
-		return _handle.cols[idxCol];
-	}
-
-
-	sbhAcessor GetRow(size_t idxRow) {
-		return sbhAcessor(_handle.rows[idxRow]);
-	}
-	sbhAcessor GetCol(size_t idxCol) {
-		return sbhAcessor(_handle.cols[idxCol]);
-	}
+	
 
 	void for_each(StringBlockHandle_t h, void(*f)(decltype(*h.data)&)) {
 		for (size_t i = 0; i < h.size; i++) {
@@ -505,9 +273,15 @@ public:
 		}
 	}
 
+	void FillWith(char ch) {
+		for (size_t i = 0; i < _handle.size; i++) {
+			_handle.data[i].ch = ch;
+		}
+	}
+
 	void Fill_null_spaces(char _null_char) {
 		for (size_t i = 0; i < _handle.size; i++) {
-			if (_handle.data[i] == 0)
+			if (_handle.data[i].ch == 0)
 				_handle.data[i].ch = _null_char;
 		}
 	}
@@ -516,21 +290,36 @@ public:
 	int16_t Width() const { return GetWidth(_handle); }
 	int16_t Height() const { return GetHeight(_handle); }
 	
+	const char* ToString() {
+		char* str = new char[_handle.size+1];
+		for (int i = 0; i < _handle.size; i++) {
+			str[i] = _handle.data[i].ch;
+		}
+		str[_handle.size] = '\0';
+		return str;
+	}
 	
-	void Print() {
+	void Print(int x, int y, uint32_t printFlags = 0) {
+		vtCursor<move>(x, y);
+		Print(printFlags);
+	}
+
+	void Print(uint32_t printFlags = 0) {
 		auto w = Width();
 		auto h = Height();
 		for (int y = 0; y < h; y++) {
+			vtCursor<save>();
 			for (int x = 0; x < w; x++) {
-				if (_handle.rows[y][x].color != 0) {
-					auto r = GetRed(_handle.rows[y][x].color);
-					auto g = GetGreen(_handle.rows[y][x].color);
-					auto b = GetBlue(_handle.rows[y][x].color);
-					printf("\x1b[48;2;%i;%i;%im ", r, g, b);
-				}
-				printf("%c", _handle.rows[y][x].ch);
+				auto color = _handle.rows[y][x].color;
+				char spacing = printFlags == 1 ? ' ' : 0;
+				if (color.value != 0)
+					std::cout << vtBackgroundColor(color.value) << spacing << _handle.rows[y][x].ch;
+				else
+					std::cout << _handle.rows[y][x].ch;
 			}
-			printf("\n");
+			vtCursor<load>();
+			vtCursor<moveDown>();
+		
 		}
 	}
 
