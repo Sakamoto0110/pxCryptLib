@@ -230,11 +230,11 @@ void Encrypt2(const char* plaintext, const char* key) {
 	int szBlock = width * height;
 	int szStr = strlen(plaintext);
 	int nBlocks = szStr > szBlock ? (szStr / szBlock) + 1 : 1;
-	
+	printf("plaintext: %s\n", plaintext);
 	printf("plaintext size: %i\n", szStr);
 	printf("block size: %i\n", szBlock);
 	printf("number of blocks: %i\n", nBlocks);
-	printf("plaintext: %s\n", plaintext);
+
 	// * * * * * * * * * * * * * * * * * * * * *
 	// Create blocks
 	std::string* str = SplitStrings(plaintext, nBlocks, szBlock);
@@ -267,11 +267,6 @@ void Encrypt2(const char* plaintext, const char* key) {
 		}
 		
 	}
-	printf("cypher text: ");
-	for (int i = 0; i < nBlocks; i++) {
-		std::cout << blocks[i]->ToString();
-	}
-	printf("\n");
 	fn_showgrid(9, nBlocks, width, height, blocks);
 	
 	
@@ -283,7 +278,7 @@ void Encrypt2(const char* plaintext, const char* key) {
 		}
 	}
 	fn_showgrid(13, nBlocks, width, height, blocks);
-	printf("\ncypher text reversed: ");
+	printf("\n");
 	for (int i = 0; i < nBlocks; i++) {
 		std::cout << blocks[i]->ToString();
 	}
@@ -296,18 +291,127 @@ int main()
 {
 	
 	ShowConsoleCursor(false);
-	std::cout << "Insira o texto:\n";
-	std::string input{};
-	std::cin >> input;
-	std::cout << "\nInsira a chave:\n";
-	std::string key{};
-	std::cin >> key;
-	system("cls");
-	Encrypt2<2,2>(input.c_str(), key.c_str());
+	Encrypt2<2,2>("somedatalongtwo", "cgra");
 
+
+
+
+
+
+
+
+
+
+
+
+
+	//system("pause");
+	//exemples::exemple_1_10x10();
+	printl;
+	/*for (auto v = it.begin(); v != it.end(); v = it.Next()) {
+		printf("v[%c] end[%c]\n", (it.Actual()).ch, (*it.end()).ch);
+	}
+	printf("\n\nv[%c] \n", (it.Actual()).ch);*/
+	
 	printf("\n");
 	printf("\x1b[0m");
 	system("pause");
+	/*PopulateStringBlock(handle, "123456789");
+	std::cout << "size: " << GetSize(handle.cols[0].cols[0]) << '\n';
+	std::cout << "width: " << GetWidth(handle.cols[0].cols[0]) << '\n';
+	std::cout << "height: " << GetHeight(handle.cols[0].cols[0]) << '\n';
+	printf("\n");*/
+	
+//	sb.Print2D();
+
+	
+	//auto b = MakeColorMap<10>(0, 125);
+	//for (size_t y = 0; y < 10; y++) {
+	//	std::array < int32_t, 10> colors = MakeColorMap<10>(125, 255);
+	//	for (size_t x = 0; x < 10; x++) {
+	//		
+	//		//std::cout << colors[y][x] << ',';
+	//		printf("\x1b[48;2;%i;%i;%im ", GetRed(colors[x]- b[y]), 0, GetBlue(colors[x]-b[y]));
+	//	}
+	//	printf("\n");
+	//}
+	//
+	//
+	//
+	//StringBlockHandler sb(3, 3);
+	//
+	//
+
+	//sb.SetContent("123456789");
+	//sb.hRows[0].pcBlock[0].color = Color_RGB(125,0,0);
+	//sb.hRows[1].pcBlock[0].color = Color_RGB(125, 0, 0);
+	//sb.hRows[2].pcBlock[0].color = Color_RGB(125, 0, 0);
+
+	//sb.hRows[0].pcBlock[1].color = Color_RGB(0, 0, 125);
+	//sb.hRows[1].pcBlock[1].color = Color_RGB(0, 0, 125);
+	//sb.hRows[2].pcBlock[1].color = Color_RGB(0, 0, 125);
+
+	//sb.hRows[0].pcBlock[2].color = Color_RGB(0, 125, 0);
+	//sb.hRows[1].pcBlock[2].color = Color_RGB(0, 125, 0);
+	//sb.hRows[2].pcBlock[2].color = Color_RGB(0, 125, 0);
+	////Sleep(3000);
+	//sb.Print2D();
+	//
+	//printf("\x1b[0m");
+	return 0;
+	constexpr int size = 7;
+	char str[8] = "1+3+6+6";
+	std::stack<ExprNode*> stk{};
+	for (int i = 0; i < size-1; i++) {
+		if (str[i] == '+') {
+			ExprNode* op = new ExprNode();
+			if (stk.size() > 0) {
+				ExprNode* last = stk.top();
+				if (last != 0) {
+					
+					op->a = last;
+				}
+			}
+			else {
+				if (str[i - 1] == '1') {
+					op->a = new ExprNode(1);
+				}
+				if (str[i - 1] == '3') {
+					op->a = new ExprNode(3);
+				}
+				if (str[i - 1] == '6') {
+					op->a = new ExprNode(6);
+				}
+			}
+			if (str[i + 1] == '1') {
+				op->b = new ExprNode(1);
+			}
+			if (str[i + 1] == '3') {
+				op->b = new ExprNode(3);
+			}
+			if (str[i+1] == '6') {
+				op->b = new ExprNode(6);
+			}
+			op->op = '+';
+			stk.push(op);
+		}
+		
+		
+		
+	}
+	for (int i = 0; i < stk.size(); i++) {
+		auto expr = stk.top();
+		std::cout << expr->Eval() << std::endl;
+		stk.pop();
+	}
+	/*
+	ExprNode a = 10;
+	ExprNode b = 5;
+
+	ExprNode e;
+	e.a = &a;
+	e.b = &b;
+	e.op = '+';*/
 	
     return 0;
 }

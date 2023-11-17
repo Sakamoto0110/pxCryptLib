@@ -1,0 +1,1 @@
+executavel: x64/Debug/pxCryptDemo.exe
