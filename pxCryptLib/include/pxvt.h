@@ -209,5 +209,42 @@ namespace vtHelper {
 };
 
 
+#include <stdio.h>
+
+#define vtPositionA         "\x1b[%i;%iH"
+#define vtBackgroundColorA  "\x1b[48;2;%i;%i;%im"
+#define vtForegroundColorA  "\x1b[38;2;%i;%i;%im"
+#define vtCurMOVEA          "\x1b[%i;%iH"
+#define vtCurUPA            "\x1b[%iA"
+#define vtCurDOWNA          "\x1b[%iB"
+#define vtCurRIGHTA         "\x1b[%iC"
+#define vtCurLEFTA          "\x1b[%iD"
+#define vtCurLDOWNA         "\x1b[%iE"
+#define vtCurLUPA           "\x1b[%iF"
+#define vtCurHABSA          "\x1b[%iG"
+#define vtCurVABSA          "\x1b[%id"
+#define vtCurSVA            "\x1b""7"
+#define vtCurLDA            "\x1b""8"
+
+#define vtBuffMainA         "\x1b[?1049h"
+#define vtBuffAltA          "\x1b[?1049l"
+
+#define vtRSTA              "\x1b[!p"
+
+#include <Windows.h>
+int main()
+{
+    printf( vtPositionA vtBackgroundColorA  "%s"vtRSTA, 3, 3,255,255,255, " dummy\n");
+  
+    printf("aaaaa\n");
+    // printf(vtBuffMainA);
+    printf("Hello World!\n");
+	
+
+    Sleep(2000);
+    printf(vtRSTA);
+    printf("bbbb\n");
+}
+
 
 
