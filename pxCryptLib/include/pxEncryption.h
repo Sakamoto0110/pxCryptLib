@@ -64,14 +64,7 @@ private:
 			}
 		}
 		return (char)((byte + key % range) - offset);
-		// convert to lowercase ( if is uppercase )
-		//if(byte >= uA && byte <= uZ) {
-		//	byte += 32;
-		//}
-		//bool isUpper = false;
-		//byte = (isUpper = byte >= uA && byte <= uZ) == 1 ? byte + 32 : byte;
-		//byte = byte + [&,y = byte + key] {return (char)(y >= rmin && y <= rmax ? 0 : y > rmax ? -range : range); }();
-		//return [&](auto x, auto n)->char {return (char)(x + n % range); }(byte, key) + (isUpper ? -32 : 0);
+		
 	}
 
 
@@ -90,12 +83,6 @@ private:
 			}
 		}
 		return (char)((byte - key % range) - offset);
-
-		// convert to lowercase ( if is uppercase )
-		//bool isUpper = false;
-		//byte = (isUpper = byte >= uA && byte <= uZ) == 1 ? byte + 32 : byte;
-		//byte = byte + [&, y = byte - key] {return (char)(y >= rmin && y <= rmax ? 0 : y > rmax ? -range : range); }();
-		//return [&](auto x, auto n)->char {return (char)(x - n % range); }(byte, key) + (isUpper ? -32 : 0);
 
 	}
 
